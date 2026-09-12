@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from .database import Base
 from . import models, schemas
+from .auth import hash_password
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -51,12 +52,12 @@ class CRUDUser(CRUDBase[models.User, schemas.UserCreate, schemas.UserCreate]):
         return db.query(models.User).filter(models.User.email == email).first()
 
     def create(self, db: Session, *, obj_in: schemas.UserCreate) -> models.User:
-        # In a real app, hash the password
-        fake_hashed_password = obj_in.password + "notreallyhashed"
+        hashed_password = hash_password(obj_in.password)
+
         db_obj = models.User(
             email=obj_in.email,
             name=obj_in.name,
-            hashed_password=fake_hashed_password,
+            hashed_password=hashed_password,
             is_coach=obj_in.is_coach,
         )
         db.add(db_obj)
