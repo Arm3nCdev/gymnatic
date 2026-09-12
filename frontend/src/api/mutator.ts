@@ -4,10 +4,13 @@ export const customInstance = async <T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> => {
+  const token = localStorage.getItem("access_token");
+
   const response = await fetch(`${API_URL}${url}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
       ...options?.headers,
     },
   });

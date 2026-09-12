@@ -13,7 +13,7 @@ echo "1. Iniciando servidor Backend (FastAPI) en http://localhost:8000..."
 (
     cd "$DIR/backend" || exit 1
     source venv/bin/activate
-    uvicorn app.main:app --host 0.0.0.0 --port 8000
+    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ) &
 
 BACKEND_PID=$!
