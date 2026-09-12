@@ -31,11 +31,16 @@ import type {
   ReadUsersUsersGetParams,
   Routine,
   RoutineCreate,
+  Token,
   User,
-  UserCreate
+  UserCreate,
+  UserLogin
 } from '../../model';
 
+import { customInstance } from '../../mutator';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
@@ -84,7 +89,7 @@ export const getCreateUserUsersPostUrl = () => {
 /**
  * @summary Create User
  */
-export const createUserUsersPost = async (userCreate: UserCreate, options?: RequestInit): Promise<createUserUsersPostResponse> => {
+export const createUserUsersPost = async (userCreate: UserCreate, options?: Parameters<typeof customInstance>[1]): Promise<createUserUsersPostResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -100,21 +105,14 @@ export const createUserUsersPost = async (userCreate: UserCreate, options?: Requ
     }
     return headers;
   };
-const res = await fetch(getCreateUserUsersPostUrl(),
+return customInstance<createUserUsersPostResponse>(getCreateUserUsersPostUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
     body: JSON.stringify(userCreate)
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createUserUsersPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createUserUsersPostResponse
-}
+);}
 
 
 
@@ -123,15 +121,15 @@ const res = await fetch(getCreateUserUsersPostUrl(),
 export const getCreateUserUsersPostMutationKey = () => ['createUserUsersPost'] as const;
 
 export const getCreateUserUsersPostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,CreateUserUsersPostMutationVariables, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,CreateUserUsersPostMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,CreateUserUsersPostMutationVariables, TContext> => {
 
 const mutationKey = getCreateUserUsersPostMutationKey();
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -139,7 +137,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof createUserUsersPost>>, CreateUserUsersPostMutationVariables> = (props) => {
           const {data} = props ?? {};
 
-          return  createUserUsersPost(data,fetchOptions)
+          return  createUserUsersPost(data,requestOptions)
         }
 
 
@@ -158,7 +156,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
  * @summary Create User
  */
 export const useCreateUserUsersPost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,CreateUserUsersPostMutationVariables, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserUsersPost>>, TError,CreateUserUsersPostMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createUserUsersPost>>,
         TError,
@@ -204,23 +202,16 @@ export const getReadUsersUsersGetUrl = (params?: ReadUsersUsersGetParams,) => {
 /**
  * @summary Read Users
  */
-export const readUsersUsersGet = async (params?: ReadUsersUsersGetParams, options?: RequestInit): Promise<readUsersUsersGetResponse> => {
+export const readUsersUsersGet = async (params?: ReadUsersUsersGetParams, options?: Parameters<typeof customInstance>[1]): Promise<readUsersUsersGetResponse> => {
 
-  const res = await fetch(getReadUsersUsersGetUrl(params),
+  return customInstance<readUsersUsersGetResponse>(getReadUsersUsersGetUrl(params),
   {
     ...options,
     method: 'GET'
 
 
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: readUsersUsersGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as readUsersUsersGetResponse
-}
+);}
 
 
 
@@ -233,16 +224,16 @@ export const getReadUsersUsersGetQueryKey = (params?: ReadUsersUsersGetParams,) 
     }
 
 
-export const getReadUsersUsersGetQueryOptions = <TData = Awaited<ReturnType<typeof readUsersUsersGet>>, TError = HTTPValidationError>(params?: ReadUsersUsersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUsersUsersGet>>, TError, TData>>, fetch?: RequestInit}
+export const getReadUsersUsersGetQueryOptions = <TData = Awaited<ReturnType<typeof readUsersUsersGet>>, TError = HTTPValidationError>(params?: ReadUsersUsersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUsersUsersGet>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getReadUsersUsersGetQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof readUsersUsersGet>>> = ({ signal }) => readUsersUsersGet(params, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof readUsersUsersGet>>> = ({ signal }) => readUsersUsersGet(params, { signal, ...requestOptions });
 
 
 
@@ -262,7 +253,7 @@ export function useReadUsersUsersGet<TData = Awaited<ReturnType<typeof readUsers
           TError,
           Awaited<ReturnType<typeof readUsersUsersGet>>
         > , 'initialData'
-      >, fetch?: RequestInit}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useReadUsersUsersGet<TData = Awaited<ReturnType<typeof readUsersUsersGet>>, TError = HTTPValidationError>(
@@ -272,11 +263,11 @@ export function useReadUsersUsersGet<TData = Awaited<ReturnType<typeof readUsers
           TError,
           Awaited<ReturnType<typeof readUsersUsersGet>>
         > , 'initialData'
-      >, fetch?: RequestInit}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useReadUsersUsersGet<TData = Awaited<ReturnType<typeof readUsersUsersGet>>, TError = HTTPValidationError>(
- params?: ReadUsersUsersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUsersUsersGet>>, TError, TData>>, fetch?: RequestInit}
+ params?: ReadUsersUsersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUsersUsersGet>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -284,7 +275,7 @@ export function useReadUsersUsersGet<TData = Awaited<ReturnType<typeof readUsers
  */
 
 export function useReadUsersUsersGet<TData = Awaited<ReturnType<typeof readUsersUsersGet>>, TError = HTTPValidationError>(
- params?: ReadUsersUsersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUsersUsersGet>>, TError, TData>>, fetch?: RequestInit}
+ params?: ReadUsersUsersGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUsersUsersGet>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -300,7 +291,99 @@ export function useReadUsersUsersGet<TData = Awaited<ReturnType<typeof readUsers
 
 
 
-export type createRoutineRoutinesPostResponse200 = {
+export type deleteUserUsersUserIdDeleteResponse200 = {
+  data: unknown
+  status: 200
+}
+
+export type deleteUserUsersUserIdDeleteResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type deleteUserUsersUserIdDeleteResponseSuccess = (deleteUserUsersUserIdDeleteResponse200) & {
+  headers: Headers;
+};
+export type deleteUserUsersUserIdDeleteResponseError = (deleteUserUsersUserIdDeleteResponse422) & {
+  headers: Headers;
+};
+
+export type deleteUserUsersUserIdDeleteResponse = (deleteUserUsersUserIdDeleteResponseSuccess | deleteUserUsersUserIdDeleteResponseError)
+
+export const getDeleteUserUsersUserIdDeleteUrl = (userId: number,) => {
+
+
+
+
+  return `/users/${userId}`
+}
+
+/**
+ * @summary Delete User
+ */
+export const deleteUserUsersUserIdDelete = async (userId: number, options?: Parameters<typeof customInstance>[1]): Promise<deleteUserUsersUserIdDeleteResponse> => {
+
+  return customInstance<deleteUserUsersUserIdDeleteResponse>(getDeleteUserUsersUserIdDeleteUrl(userId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteUserUsersUserIdDeleteMutationKey = () => ['deleteUserUsersUserIdDelete'] as const;
+
+export const getDeleteUserUsersUserIdDeleteMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUserUsersUserIdDelete>>, TError,DeleteUserUsersUserIdDeleteMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteUserUsersUserIdDelete>>, TError,DeleteUserUsersUserIdDeleteMutationVariables, TContext> => {
+
+const mutationKey = getDeleteUserUsersUserIdDeleteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteUserUsersUserIdDelete>>, DeleteUserUsersUserIdDeleteMutationVariables> = (props) => {
+          const {userId} = props ?? {};
+
+          return  deleteUserUsersUserIdDelete(userId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteUserUsersUserIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUserUsersUserIdDelete>>>
+
+    export type DeleteUserUsersUserIdDeleteMutationError = HTTPValidationError
+    export type DeleteUserUsersUserIdDeleteMutationVariables = {userId: number}
+
+    /**
+ * @summary Delete User
+ */
+export const useDeleteUserUsersUserIdDelete = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUserUsersUserIdDelete>>, TError,DeleteUserUsersUserIdDeleteMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteUserUsersUserIdDelete>>,
+        TError,
+        DeleteUserUsersUserIdDeleteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteUserUsersUserIdDeleteMutationOptions(options), queryClient);
+    }
+    export type createRoutineRoutinesPostResponse200 = {
   data: Routine
   status: 200
 }
@@ -330,7 +413,7 @@ export const getCreateRoutineRoutinesPostUrl = () => {
 /**
  * @summary Create Routine
  */
-export const createRoutineRoutinesPost = async (routineCreate: RoutineCreate, options?: RequestInit): Promise<createRoutineRoutinesPostResponse> => {
+export const createRoutineRoutinesPost = async (routineCreate: RoutineCreate, options?: Parameters<typeof customInstance>[1]): Promise<createRoutineRoutinesPostResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -346,21 +429,14 @@ export const createRoutineRoutinesPost = async (routineCreate: RoutineCreate, op
     }
     return headers;
   };
-const res = await fetch(getCreateRoutineRoutinesPostUrl(),
+return customInstance<createRoutineRoutinesPostResponse>(getCreateRoutineRoutinesPostUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
     body: JSON.stringify(routineCreate)
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createRoutineRoutinesPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createRoutineRoutinesPostResponse
-}
+);}
 
 
 
@@ -369,15 +445,15 @@ const res = await fetch(getCreateRoutineRoutinesPostUrl(),
 export const getCreateRoutineRoutinesPostMutationKey = () => ['createRoutineRoutinesPost'] as const;
 
 export const getCreateRoutineRoutinesPostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRoutineRoutinesPost>>, TError,CreateRoutineRoutinesPostMutationVariables, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRoutineRoutinesPost>>, TError,CreateRoutineRoutinesPostMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createRoutineRoutinesPost>>, TError,CreateRoutineRoutinesPostMutationVariables, TContext> => {
 
 const mutationKey = getCreateRoutineRoutinesPostMutationKey();
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -385,7 +461,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRoutineRoutinesPost>>, CreateRoutineRoutinesPostMutationVariables> = (props) => {
           const {data} = props ?? {};
 
-          return  createRoutineRoutinesPost(data,fetchOptions)
+          return  createRoutineRoutinesPost(data,requestOptions)
         }
 
 
@@ -404,7 +480,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
  * @summary Create Routine
  */
 export const useCreateRoutineRoutinesPost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRoutineRoutinesPost>>, TError,CreateRoutineRoutinesPostMutationVariables, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRoutineRoutinesPost>>, TError,CreateRoutineRoutinesPostMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createRoutineRoutinesPost>>,
         TError,
@@ -443,23 +519,16 @@ export const getReadRoutinesForStudentRoutinesStudentStudentIdGetUrl = (studentI
 /**
  * @summary Read Routines For Student
  */
-export const readRoutinesForStudentRoutinesStudentStudentIdGet = async (studentId: number, options?: RequestInit): Promise<readRoutinesForStudentRoutinesStudentStudentIdGetResponse> => {
+export const readRoutinesForStudentRoutinesStudentStudentIdGet = async (studentId: number, options?: Parameters<typeof customInstance>[1]): Promise<readRoutinesForStudentRoutinesStudentStudentIdGetResponse> => {
 
-  const res = await fetch(getReadRoutinesForStudentRoutinesStudentStudentIdGetUrl(studentId),
+  return customInstance<readRoutinesForStudentRoutinesStudentStudentIdGetResponse>(getReadRoutinesForStudentRoutinesStudentStudentIdGetUrl(studentId),
   {
     ...options,
     method: 'GET'
 
 
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: readRoutinesForStudentRoutinesStudentStudentIdGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as readRoutinesForStudentRoutinesStudentStudentIdGetResponse
-}
+);}
 
 
 
@@ -472,16 +541,16 @@ export const getReadRoutinesForStudentRoutinesStudentStudentIdGetQueryKey = (stu
     }
 
 
-export const getReadRoutinesForStudentRoutinesStudentStudentIdGetQueryOptions = <TData = Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError = HTTPValidationError>(studentId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError, TData>>, fetch?: RequestInit}
+export const getReadRoutinesForStudentRoutinesStudentStudentIdGetQueryOptions = <TData = Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError = HTTPValidationError>(studentId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getReadRoutinesForStudentRoutinesStudentStudentIdGetQueryKey(studentId);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>> = ({ signal }) => readRoutinesForStudentRoutinesStudentStudentIdGet(studentId, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>> = ({ signal }) => readRoutinesForStudentRoutinesStudentStudentIdGet(studentId, { signal, ...requestOptions });
 
 
 
@@ -501,7 +570,7 @@ export function useReadRoutinesForStudentRoutinesStudentStudentIdGet<TData = Awa
           TError,
           Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>
         > , 'initialData'
-      >, fetch?: RequestInit}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useReadRoutinesForStudentRoutinesStudentStudentIdGet<TData = Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError = HTTPValidationError>(
@@ -511,11 +580,11 @@ export function useReadRoutinesForStudentRoutinesStudentStudentIdGet<TData = Awa
           TError,
           Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>
         > , 'initialData'
-      >, fetch?: RequestInit}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useReadRoutinesForStudentRoutinesStudentStudentIdGet<TData = Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError = HTTPValidationError>(
- studentId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError, TData>>, fetch?: RequestInit}
+ studentId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -523,7 +592,7 @@ export function useReadRoutinesForStudentRoutinesStudentStudentIdGet<TData = Awa
  */
 
 export function useReadRoutinesForStudentRoutinesStudentStudentIdGet<TData = Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError = HTTPValidationError>(
- studentId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError, TData>>, fetch?: RequestInit}
+ studentId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRoutinesForStudentRoutinesStudentStudentIdGet>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -569,7 +638,7 @@ export const getCreatePaymentPaymentsPostUrl = () => {
 /**
  * @summary Create Payment
  */
-export const createPaymentPaymentsPost = async (paymentCreate: PaymentCreate, options?: RequestInit): Promise<createPaymentPaymentsPostResponse> => {
+export const createPaymentPaymentsPost = async (paymentCreate: PaymentCreate, options?: Parameters<typeof customInstance>[1]): Promise<createPaymentPaymentsPostResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -585,21 +654,14 @@ export const createPaymentPaymentsPost = async (paymentCreate: PaymentCreate, op
     }
     return headers;
   };
-const res = await fetch(getCreatePaymentPaymentsPostUrl(),
+return customInstance<createPaymentPaymentsPostResponse>(getCreatePaymentPaymentsPostUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
     body: JSON.stringify(paymentCreate)
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createPaymentPaymentsPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createPaymentPaymentsPostResponse
-}
+);}
 
 
 
@@ -608,15 +670,15 @@ const res = await fetch(getCreatePaymentPaymentsPostUrl(),
 export const getCreatePaymentPaymentsPostMutationKey = () => ['createPaymentPaymentsPost'] as const;
 
 export const getCreatePaymentPaymentsPostMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPaymentPaymentsPost>>, TError,CreatePaymentPaymentsPostMutationVariables, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPaymentPaymentsPost>>, TError,CreatePaymentPaymentsPostMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createPaymentPaymentsPost>>, TError,CreatePaymentPaymentsPostMutationVariables, TContext> => {
 
 const mutationKey = getCreatePaymentPaymentsPostMutationKey();
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -624,7 +686,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPaymentPaymentsPost>>, CreatePaymentPaymentsPostMutationVariables> = (props) => {
           const {data} = props ?? {};
 
-          return  createPaymentPaymentsPost(data,fetchOptions)
+          return  createPaymentPaymentsPost(data,requestOptions)
         }
 
 
@@ -643,7 +705,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
  * @summary Create Payment
  */
 export const useCreatePaymentPaymentsPost = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPaymentPaymentsPost>>, TError,CreatePaymentPaymentsPostMutationVariables, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPaymentPaymentsPost>>, TError,CreatePaymentPaymentsPostMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createPaymentPaymentsPost>>,
         TError,
@@ -689,23 +751,16 @@ export const getReadPaymentsPaymentsGetUrl = (params?: ReadPaymentsPaymentsGetPa
 /**
  * @summary Read Payments
  */
-export const readPaymentsPaymentsGet = async (params?: ReadPaymentsPaymentsGetParams, options?: RequestInit): Promise<readPaymentsPaymentsGetResponse> => {
+export const readPaymentsPaymentsGet = async (params?: ReadPaymentsPaymentsGetParams, options?: Parameters<typeof customInstance>[1]): Promise<readPaymentsPaymentsGetResponse> => {
 
-  const res = await fetch(getReadPaymentsPaymentsGetUrl(params),
+  return customInstance<readPaymentsPaymentsGetResponse>(getReadPaymentsPaymentsGetUrl(params),
   {
     ...options,
     method: 'GET'
 
 
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: readPaymentsPaymentsGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as readPaymentsPaymentsGetResponse
-}
+);}
 
 
 
@@ -718,16 +773,16 @@ export const getReadPaymentsPaymentsGetQueryKey = (params?: ReadPaymentsPayments
     }
 
 
-export const getReadPaymentsPaymentsGetQueryOptions = <TData = Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError = HTTPValidationError>(params?: ReadPaymentsPaymentsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError, TData>>, fetch?: RequestInit}
+export const getReadPaymentsPaymentsGetQueryOptions = <TData = Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError = HTTPValidationError>(params?: ReadPaymentsPaymentsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getReadPaymentsPaymentsGetQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof readPaymentsPaymentsGet>>> = ({ signal }) => readPaymentsPaymentsGet(params, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof readPaymentsPaymentsGet>>> = ({ signal }) => readPaymentsPaymentsGet(params, { signal, ...requestOptions });
 
 
 
@@ -747,7 +802,7 @@ export function useReadPaymentsPaymentsGet<TData = Awaited<ReturnType<typeof rea
           TError,
           Awaited<ReturnType<typeof readPaymentsPaymentsGet>>
         > , 'initialData'
-      >, fetch?: RequestInit}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useReadPaymentsPaymentsGet<TData = Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError = HTTPValidationError>(
@@ -757,11 +812,11 @@ export function useReadPaymentsPaymentsGet<TData = Awaited<ReturnType<typeof rea
           TError,
           Awaited<ReturnType<typeof readPaymentsPaymentsGet>>
         > , 'initialData'
-      >, fetch?: RequestInit}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useReadPaymentsPaymentsGet<TData = Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError = HTTPValidationError>(
- params?: ReadPaymentsPaymentsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError, TData>>, fetch?: RequestInit}
+ params?: ReadPaymentsPaymentsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -769,7 +824,7 @@ export function useReadPaymentsPaymentsGet<TData = Awaited<ReturnType<typeof rea
  */
 
 export function useReadPaymentsPaymentsGet<TData = Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError = HTTPValidationError>(
- params?: ReadPaymentsPaymentsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError, TData>>, fetch?: RequestInit}
+ params?: ReadPaymentsPaymentsGetParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPaymentsPaymentsGet>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -785,3 +840,109 @@ export function useReadPaymentsPaymentsGet<TData = Awaited<ReturnType<typeof rea
 
 
 
+export type loginAuthLoginPostResponse200 = {
+  data: Token
+  status: 200
+}
+
+export type loginAuthLoginPostResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type loginAuthLoginPostResponseSuccess = (loginAuthLoginPostResponse200) & {
+  headers: Headers;
+};
+export type loginAuthLoginPostResponseError = (loginAuthLoginPostResponse422) & {
+  headers: Headers;
+};
+
+export type loginAuthLoginPostResponse = (loginAuthLoginPostResponseSuccess | loginAuthLoginPostResponseError)
+
+export const getLoginAuthLoginPostUrl = () => {
+
+
+
+
+  return `/auth/login`
+}
+
+/**
+ * @summary Login
+ */
+export const loginAuthLoginPost = async (userLogin: UserLogin, options?: Parameters<typeof customInstance>[1]): Promise<loginAuthLoginPostResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customInstance<loginAuthLoginPostResponse>(getLoginAuthLoginPostUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(userLogin)
+  }
+);}
+
+
+
+
+
+export const getLoginAuthLoginPostMutationKey = () => ['loginAuthLoginPost'] as const;
+
+export const getLoginAuthLoginPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginAuthLoginPost>>, TError,LoginAuthLoginPostMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof loginAuthLoginPost>>, TError,LoginAuthLoginPostMutationVariables, TContext> => {
+
+const mutationKey = getLoginAuthLoginPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginAuthLoginPost>>, LoginAuthLoginPostMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  loginAuthLoginPost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LoginAuthLoginPostMutationResult = NonNullable<Awaited<ReturnType<typeof loginAuthLoginPost>>>
+    export type LoginAuthLoginPostMutationBody = UserLogin
+    export type LoginAuthLoginPostMutationError = HTTPValidationError
+    export type LoginAuthLoginPostMutationVariables = {data: UserLogin}
+
+    /**
+ * @summary Login
+ */
+export const useLoginAuthLoginPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginAuthLoginPost>>, TError,LoginAuthLoginPostMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof loginAuthLoginPost>>,
+        TError,
+        LoginAuthLoginPostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getLoginAuthLoginPostMutationOptions(options), queryClient);
+    }
