@@ -12,11 +12,15 @@ export const customInstance = async <T>(
     },
   });
 
-  const data = response.status === 204 ? null : await response.json();
+  const body = response.status === 204 ? null : await response.json();
 
   if (!response.ok) {
-    throw data;
+    throw body;
   }
 
-  return data;
+  return {
+    data: body,
+    status: response.status,
+    headers: response.headers,
+  } as T;
 };

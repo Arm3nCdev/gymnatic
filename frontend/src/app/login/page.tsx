@@ -3,10 +3,12 @@
 import { FormEvent, useState } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useLoginAuthLoginPost } from "@/api/endpoints/default/default";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
 
+  const router = useRouter();
   const loginMutation = useLoginAuthLoginPost();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -17,12 +19,27 @@ export default function Page() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    loginMutation.mutate({
-      data: {
-        email,
-        password,
+    loginMutation.mutate(
+      {
+        data: {
+          email,
+          password,
+        },
       },
-    });
+      {
+        onSuccess: (response) => {
+          if (response.status !== 200) {
+            return;
+          }
+
+          localStorage.setItem("access_token", response.data.access_token);
+
+          localStorage.setItem("token_type", response.data.token_type);
+
+          router.push("/dashboard");
+        },
+      },
+    );
   }
 
   return (
@@ -33,9 +50,7 @@ export default function Page() {
             G
           </div>
 
-          <h1 className="text-3xl font-semibold tracking-tight">
-            gymnatic
-          </h1>
+          <h1 className="text-3xl font-semibold tracking-tight">gymnatic</h1>
 
           <p className="mt-2 text-sm text-muted-foreground">
             Inicia sesión para gestionar tu gimnasio.
@@ -99,9 +114,7 @@ export default function Page() {
 
                 <button
                   type="button"
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   onClick={() => setShowPassword((visible) => !visible)}
                   className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:text-foreground"
                 >
@@ -127,7 +140,9 @@ export default function Page() {
               disabled={loginMutation.isPending}
               className="h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loginMutation.isPending ? "Iniciando sesión..." : "Iniciar sesión"}
+              {loginMutation.isPending
+                ? "Iniciando sesión..."
+                : "Iniciar sesión"}
             </button>
 
             {loginMutation.isError && (
