@@ -3,13 +3,19 @@
 import { FormEvent, useState } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail, User } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCreateUserUsersPost } from "@/api/endpoints/default/default";
+import {
+  useCreateUserUsersPost,
+  useLoginAuthLoginPost,
+} from "@/api/endpoints/default/default";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordMismatch, setPasswordMismatch] = useState(false);
   const router = useRouter();
   const registerMutation = useCreateUserUsersPost();
+  const loginMutation = useLoginAuthLoginPost();
+  const { login } = useAuth();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,7 +49,24 @@ export default function Page() {
             return;
           }
 
-          router.push("/login");
+          loginMutation.mutate(
+            {
+              data: {
+                email,
+                password,
+              },
+            },
+            {
+              onSuccess: (loginResponse) => {
+                if (loginResponse.status !== 200) {
+                  return;
+                }
+
+                login(loginResponse.data.access_token);
+                router.push("/dashboard");
+              },
+            },
+          );
         },
       },
     );
@@ -182,10 +205,10 @@ export default function Page() {
 
             <button
               type="submit"
-              disabled={registerMutation.isPending}
+              disabled={registerMutation.isPending || loginMutation.isPending}
               className="h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25"
             >
-              {registerMutation.isPending ? "Creando cuenta..." : "Registrarse"}
+              {registerMutation.isPending || loginMutation.isPending ? "Creando cuenta..." : "Registrarse"}
             </button>
           </form>
 
