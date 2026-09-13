@@ -32,7 +32,7 @@ export default function Page() {
 
           <button
             type="button"
-            className="h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-24 h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
             onClick={() => {
               localStorage.removeItem("access_token");
               localStorage.removeItem("token_type");

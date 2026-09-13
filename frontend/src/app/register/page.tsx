@@ -1,30 +1,40 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
-import { useLoginAuthLoginPost } from "@/api/endpoints/default/default";
+import { Eye, EyeOff, LockKeyhole, Mail, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCreateUserUsersPost } from "@/api/endpoints/default/default";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
   const router = useRouter();
-  const loginMutation = useLoginAuthLoginPost();
+  const registerMutation = useCreateUserUsersPost();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
 
+    const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
 
-    loginMutation.mutate(
+    if (password !== confirmPassword) {
+      setPasswordMismatch(true);
+      return;
+    }
+
+    setPasswordMismatch(false);
+
+    registerMutation.mutate(
       {
         data: {
+          name,
           email,
           password,
+          is_coach: false,
         },
       },
       {
@@ -33,13 +43,7 @@ export default function Page() {
             return;
           }
 
-          const storage = rememberMe ? localStorage : sessionStorage;
-
-          storage.setItem("access_token", response.data.access_token);
-
-          storage.setItem("token_type", response.data.token_type);
-
-          router.push("/dashboard");
+          router.push("/login");
         },
       },
     );
@@ -52,27 +56,44 @@ export default function Page() {
           <div className="mx-auto mb-5 flex size-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-primary-foreground">
             G
           </div>
-
           <h1 className="text-3xl font-semibold tracking-tight">gymnatic</h1>
-
           <p className="mt-2 text-sm text-muted-foreground">
-            Inicia sesión para gestionar tu gimnasio.
+            Crea tu cuenta de gymnatic.
           </p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6 shadow-xl shadow-black/10 sm:p-8">
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
+              <label htmlFor="name" className="text-sm font-medium">
+                Nombre
+              </label>
+              <div className="relative">
+                <User
+                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="Tu nombre"
+                  required
+                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/15"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
                 Correo
               </label>
-
               <div className="relative">
                 <Mail
                   className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                   aria-hidden="true"
                 />
-
                 <input
                   id="email"
                   name="email"
@@ -90,31 +111,21 @@ export default function Page() {
                 <label htmlFor="password" className="text-sm font-medium">
                   Contraseña
                 </label>
-
-                <button
-                  type="button"
-                  className="text-xs font-medium text-primary hover:underline"
-                >
-                  Olvidaste tu contraseña?
-                </button>
               </div>
-
               <div className="relative">
                 <LockKeyhole
                   className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                   aria-hidden="true"
                 />
-
                 <input
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  placeholder="Ingresa tu contraseña"
+                  autoComplete="new-password"
+                  placeholder="Ingrese tu contraseña"
                   required
                   className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-10 text-sm outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/15"
                 />
-
                 <button
                   type="button"
                   aria-label={showPassword ? "Hide password" : "Show password"}
@@ -128,59 +139,73 @@ export default function Page() {
                   )}
                 </button>
               </div>
-            </div>
+              <div className="relative">
+                <LockKeyhole
+                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Repite tu contraseña"
+                  required
+                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-10 text-sm outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/15"
+                />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                </button>
+              </div>
 
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(event) => setRememberMe(event.target.checked)}
-                className="size-4 rounded border-input accent-primary"
-              />
-              Recuerdame
-            </label>
+              {registerMutation.isError && (
+                <p className="text-sm text-destructive">
+                  No se pudo crear la cuenta. Verifica tus datos.
+                </p>
+              )}
+
+              {passwordMismatch && (
+                <p className="text-sm text-destructive">
+                  Las contraseñas no coinciden.
+                </p>
+              )}
+            </div>
 
             <button
               type="submit"
-              disabled={loginMutation.isPending}
-              className="h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={registerMutation.isPending}
+              className="h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25"
             >
-              {loginMutation.isPending
-                ? "Iniciando sesión..."
-                : "Iniciar sesión"}
+              {registerMutation.isPending ? "Creando cuenta..." : "Registrarse"}
             </button>
-
-            {loginMutation.isError && (
-              <p className="text-center text-sm text-red-500">
-                Correo o contraseña incorrectos.
-              </p>
-            )}
-
-            {loginMutation.isSuccess && (
-              <p className="text-center text-sm text-green-500">
-                ¡Inicio de sesión exitoso!
-              </p>
-            )}
           </form>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            No tienes una cuenta?{" "}
+            Already have an account?{" "}
             <button
               type="button"
               className="font-medium text-primary hover:underline"
-              onClick={() => router.push("/register")}
+              onClick={() => router.push("/login")}
             >
-              Registrate
+              Sign in
             </button>
           </p>
-
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Necesitas acceso?{" "}
+            Need access?{" "}
             <button
               type="button"
               className="font-medium text-primary hover:underline"
             >
-              Contacta a tu administrador
+              Contact your admin
             </button>
           </p>
         </div>
