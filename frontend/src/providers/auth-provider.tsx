@@ -6,17 +6,25 @@ import { setAccessToken } from "@/api/mutator";
 type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
+  login: (token: string) => void;
+  logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  function login(token: string) {
+    setAccessToken(token);
+    setIsAuthenticated(true);
+  }
+
+  function logout() {
+    setAccessToken(null);
+    setIsAuthenticated(false);
+  }
 
   useEffect(() => {
     async function restoreSession() {
@@ -50,8 +58,9 @@ export function AuthProvider({
     restoreSession();
   }, []);
 
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -4,11 +4,10 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { useLogoutAuthLogoutPost } from "@/api/endpoints/default/default";
-import { setAccessToken } from "@/api/mutator";
 
 export default function Page() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, logout } = useAuth();
   const logoutMutation = useLogoutAuthLogoutPost();
 
   useEffect(() => {
@@ -42,7 +41,7 @@ export default function Page() {
             onClick={() => {
               logoutMutation.mutate(undefined, {
                 onSuccess: () => {
-                  setAccessToken(null);
+                  logout();
                   router.replace("/login");
                 },
               });

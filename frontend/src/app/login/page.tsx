@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useLoginAuthLoginPost } from "@/api/endpoints/default/default";
-import { setAccessToken } from "@/api/mutator";
+import { useAuth } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
 
 export default function Page() {
@@ -12,6 +12,7 @@ export default function Page() {
 
   const router = useRouter();
   const loginMutation = useLoginAuthLoginPost();
+  const { login } = useAuth();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -34,7 +35,7 @@ export default function Page() {
             return;
           }
 
-          setAccessToken(response.data.access_token);
+          login(response.data.access_token);
 
           router.push("/dashboard");
         },
