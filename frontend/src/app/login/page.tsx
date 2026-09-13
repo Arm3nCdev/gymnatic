@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useLoginAuthLoginPost } from "@/api/endpoints/default/default";
+import { setAccessToken } from "@/api/mutator";
 import { useRouter } from "next/navigation";
 
 export default function Page() {
@@ -33,11 +34,7 @@ export default function Page() {
             return;
           }
 
-          const storage = rememberMe ? localStorage : sessionStorage;
-
-          storage.setItem("access_token", response.data.access_token);
-
-          storage.setItem("token_type", response.data.token_type);
+          setAccessToken(response.data.access_token);
 
           router.push("/dashboard");
         },

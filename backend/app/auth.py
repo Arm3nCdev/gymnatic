@@ -1,13 +1,25 @@
 from datetime import datetime, timedelta, timezone
 
+import os
+import hashlib
+import secrets
+from dotenv import load_dotenv
+
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pwdlib import PasswordHash
 
-SECRET_KEY = "cambiame-por-una-clave-secreta-broooooo"
+
+load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY no está configurada")
+
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
+REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 password_hash = PasswordHash.recommended()
 
@@ -20,6 +32,20 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed_password: str) -> bool:
     return password_hash.verify(password, hashed_password)
+
+
+def create_refresh_token() -> str:
+    return secrets.token_urlsafe(32)
+
+
+def hash_refresh_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def get_refresh_token_expiration() -> datetime:
+    return datetime.now(timezone.utc) + timedelta(
+        days=REFRESH_TOKEN_EXPIRE_DAYS
+    )
 
 
 def create_access_token(data: dict) -> str:

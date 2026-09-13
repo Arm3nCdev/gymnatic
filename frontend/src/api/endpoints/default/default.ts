@@ -946,3 +946,187 @@ export const useLoginAuthLoginPost = <TError = HTTPValidationError,
       > => {
       return useMutation(getLoginAuthLoginPostMutationOptions(options), queryClient);
     }
+    export type refreshAccessTokenAuthRefreshPostResponse200 = {
+  data: Token
+  status: 200
+}
+
+export type refreshAccessTokenAuthRefreshPostResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type refreshAccessTokenAuthRefreshPostResponseSuccess = (refreshAccessTokenAuthRefreshPostResponse200) & {
+  headers: Headers;
+};
+export type refreshAccessTokenAuthRefreshPostResponseError = (refreshAccessTokenAuthRefreshPostResponse422) & {
+  headers: Headers;
+};
+
+export type refreshAccessTokenAuthRefreshPostResponse = (refreshAccessTokenAuthRefreshPostResponseSuccess | refreshAccessTokenAuthRefreshPostResponseError)
+
+export const getRefreshAccessTokenAuthRefreshPostUrl = () => {
+
+
+
+
+  return `/auth/refresh`
+}
+
+/**
+ * @summary Refresh Access Token
+ */
+export const refreshAccessTokenAuthRefreshPost = async ( options?: Parameters<typeof customInstance>[1]): Promise<refreshAccessTokenAuthRefreshPostResponse> => {
+
+  return customInstance<refreshAccessTokenAuthRefreshPostResponse>(getRefreshAccessTokenAuthRefreshPostUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRefreshAccessTokenAuthRefreshPostMutationKey = () => ['refreshAccessTokenAuthRefreshPost'] as const;
+
+export const getRefreshAccessTokenAuthRefreshPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshAccessTokenAuthRefreshPost>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof refreshAccessTokenAuthRefreshPost>>, TError,void, TContext> => {
+
+const mutationKey = getRefreshAccessTokenAuthRefreshPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshAccessTokenAuthRefreshPost>>, void> = () => {
+
+
+          return  refreshAccessTokenAuthRefreshPost(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RefreshAccessTokenAuthRefreshPostMutationResult = NonNullable<Awaited<ReturnType<typeof refreshAccessTokenAuthRefreshPost>>>
+
+    export type RefreshAccessTokenAuthRefreshPostMutationError = HTTPValidationError
+
+
+    /**
+ * @summary Refresh Access Token
+ */
+export const useRefreshAccessTokenAuthRefreshPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshAccessTokenAuthRefreshPost>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof refreshAccessTokenAuthRefreshPost>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRefreshAccessTokenAuthRefreshPostMutationOptions(options), queryClient);
+    }
+    export type logoutAuthLogoutPostResponse200 = {
+  data: unknown
+  status: 200
+}
+
+export type logoutAuthLogoutPostResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type logoutAuthLogoutPostResponseSuccess = (logoutAuthLogoutPostResponse200) & {
+  headers: Headers;
+};
+export type logoutAuthLogoutPostResponseError = (logoutAuthLogoutPostResponse422) & {
+  headers: Headers;
+};
+
+export type logoutAuthLogoutPostResponse = (logoutAuthLogoutPostResponseSuccess | logoutAuthLogoutPostResponseError)
+
+export const getLogoutAuthLogoutPostUrl = () => {
+
+
+
+
+  return `/auth/logout`
+}
+
+/**
+ * @summary Logout
+ */
+export const logoutAuthLogoutPost = async ( options?: Parameters<typeof customInstance>[1]): Promise<logoutAuthLogoutPostResponse> => {
+
+  return customInstance<logoutAuthLogoutPostResponse>(getLogoutAuthLogoutPostUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getLogoutAuthLogoutPostMutationKey = () => ['logoutAuthLogoutPost'] as const;
+
+export const getLogoutAuthLogoutPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAuthLogoutPost>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof logoutAuthLogoutPost>>, TError,void, TContext> => {
+
+const mutationKey = getLogoutAuthLogoutPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutAuthLogoutPost>>, void> = () => {
+
+
+          return  logoutAuthLogoutPost(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogoutAuthLogoutPostMutationResult = NonNullable<Awaited<ReturnType<typeof logoutAuthLogoutPost>>>
+
+    export type LogoutAuthLogoutPostMutationError = HTTPValidationError
+
+
+    /**
+ * @summary Logout
+ */
+export const useLogoutAuthLogoutPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAuthLogoutPost>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof logoutAuthLogoutPost>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getLogoutAuthLogoutPostMutationOptions(options), queryClient);
+    }

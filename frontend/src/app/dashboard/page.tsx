@@ -2,19 +2,24 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/providers/auth-provider";
+import { useLogoutAuthLogoutPost } from "@/api/endpoints/default/default";
+import { setAccessToken } from "@/api/mutator";
 
 export default function Page() {
   const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+  const logoutMutation = useLogoutAuthLogoutPost();
 
   useEffect(() => {
-    const token =
-      localStorage.getItem("access_token") ||
-      sessionStorage.getItem("access_token");
-
-    if (!token) {
+    if (!isLoading && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [router]);
+  }, [isLoading, isAuthenticated, router]);
+
+  if (isLoading) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-5 py-8 text-foreground">
@@ -32,18 +37,18 @@ export default function Page() {
 
           <button
             type="button"
+            disabled={logoutMutation.isPending}
             className="mt-24 h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
             onClick={() => {
-              localStorage.removeItem("access_token");
-              localStorage.removeItem("token_type");
-
-              sessionStorage.removeItem("access_token");
-              sessionStorage.removeItem("token_type");
-
-              router.replace("/login");
+              logoutMutation.mutate(undefined, {
+                onSuccess: () => {
+                  setAccessToken(null);
+                  router.replace("/login");
+                },
+              });
             }}
           >
-            Cerrar sesión
+            {logoutMutation.isPending ? "Cerrando sesión..." : "Cerrar sesión"}
           </button>
         </div>
 

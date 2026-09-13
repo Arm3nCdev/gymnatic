@@ -1,13 +1,16 @@
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from pydantic import BaseModel
+from datetime import datetime
 from sqlalchemy.orm import Session
+
 from .database import Base
 from . import models, schemas
-from .auth import hash_password
+from .auth import hash_password, hash_refresh_token
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
+
 
 class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType]):
@@ -47,6 +50,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db.commit()
         return obj
 
+
 class CRUDUser(CRUDBase[models.User, schemas.UserCreate, schemas.UserCreate]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[models.User]:
         return db.query(models.User).filter(models.User.email == email).first()
@@ -65,11 +69,85 @@ class CRUDUser(CRUDBase[models.User, schemas.UserCreate, schemas.UserCreate]):
         db.refresh(db_obj)
         return db_obj
 
+
 class CRUDRoutine(CRUDBase[models.Routine, schemas.RoutineCreate, schemas.RoutineCreate]):
     def get_by_student(self, db: Session, *, student_id: int) -> List[models.Routine]:
         return db.query(models.Routine).filter(models.Routine.student_id == student_id).all()
 
+
+class CRUDRefreshToken:
+    def create(
+        self,
+        db: Session,
+        *,
+        user_id: int,
+        token: str,
+        expires_at: datetime,
+    ) -> models.RefreshToken:
+        db_obj = models.RefreshToken(
+            user_id=user_id,
+            token_hash=hash_refresh_token(token),
+            expires_at=expires_at,
+        )
+
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+
+        return db_obj
+
+    def get_by_token(
+        self,
+        db: Session,
+        *,
+        token: str,
+    ) -> Optional[models.RefreshToken]:
+        token_hash = hash_refresh_token(token)
+
+        return (
+            db.query(models.RefreshToken)
+            .filter(models.RefreshToken.token_hash == token_hash)
+            .first()
+        )
+
+    def get_valid(
+        self,
+        db: Session,
+        *,
+        token: str,
+    ) -> Optional[models.RefreshToken]:
+        refresh_token = self.get_by_token(db, token=token)
+
+        if not refresh_token:
+            return None
+
+        if refresh_token.revoked:
+            return None
+
+        if refresh_token.expires_at < datetime.utcnow():
+            return None
+
+        return refresh_token
+
+    def revoke(
+        self,
+        db: Session,
+        *,
+        refresh_token: models.RefreshToken,
+    ) -> models.RefreshToken:
+        refresh_token.revoked = True
+
+        db.add(refresh_token)
+        db.commit()
+        db.refresh(refresh_token)
+
+        return refresh_token
+
+
 user = CRUDUser(models.User)
 routine = CRUDRoutine(models.Routine)
-exercise = CRUDBase[models.Exercise, schemas.ExerciseCreate, schemas.ExerciseCreate](models.Exercise)
-payment = CRUDBase[models.Payment, schemas.PaymentCreate, schemas.PaymentCreate](models.Payment)
+exercise = CRUDBase[models.Exercise, schemas.ExerciseCreate,
+                    schemas.ExerciseCreate](models.Exercise)
+payment = CRUDBase[models.Payment, schemas.PaymentCreate,
+                   schemas.PaymentCreate](models.Payment)
+refresh_token = CRUDRefreshToken()

@@ -1,10 +1,16 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Response, Cookie
 from sqlalchemy.orm import Session
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 from . import crud, models, schemas
 from .database import engine, get_db
-from .auth import verify_password, create_access_token, get_current_user
+from .auth import (
+    verify_password,
+    create_access_token,
+    get_current_user,
+    create_refresh_token,
+    get_refresh_token_expiration,
+)
 
 # We'll use Alembic for migrations instead of create_all
 # models.Base.metadata.create_all(bind=engine)
@@ -71,7 +77,7 @@ def read_payments(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 
 @app.post("/auth/login", response_model=schemas.Token)
-def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
+def login(user: schemas.UserLogin, response: Response, db: Session = Depends(get_db)):
     db_user = crud.user.get_by_email(db, email=user.email)
 
     if not db_user:
@@ -93,7 +99,84 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
         }
     )
 
+    refresh_token = create_refresh_token()
+
+    crud.refresh_token.create(
+        db,
+        user_id=db_user.id,
+        token=refresh_token,
+        expires_at=get_refresh_token_expiration(),
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=7 * 24 * 60 * 60,
+    )
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
     }
+
+
+@app.post("/auth/refresh", response_model=schemas.Token)
+def refresh_access_token(
+    refresh_token: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+):
+    if not refresh_token:
+        raise HTTPException(
+            status_code=401,
+            detail="Refresh token missing",
+        )
+
+    db_refresh_token = crud.refresh_token.get_valid(
+        db,
+        token=refresh_token,
+    )
+
+    if not db_refresh_token:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid refresh token",
+        )
+
+    access_token = create_access_token(
+        data={
+            "sub": str(db_refresh_token.user_id),
+        }
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+
+@app.post("/auth/logout")
+def logout(
+    response: Response,
+    refresh_token: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+):
+    if refresh_token:
+        db_refresh_token = crud.refresh_token.get_by_token(
+            db,
+            token=refresh_token,
+        )
+
+        if db_refresh_token:
+            crud.refresh_token.revoke(
+                db,
+                refresh_token=db_refresh_token,
+            )
+
+    response.delete_cookie(
+        key="refresh_token",
+    )
+
+    return {"message": "Sesión cerrada correctamente"}
