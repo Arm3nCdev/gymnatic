@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const router = useRouter();
   const loginMutation = useLoginAuthLoginPost();
@@ -32,9 +33,11 @@ export default function Page() {
             return;
           }
 
-          localStorage.setItem("access_token", response.data.access_token);
+          const storage = rememberMe ? localStorage : sessionStorage;
 
-          localStorage.setItem("token_type", response.data.token_type);
+          storage.setItem("access_token", response.data.access_token);
+
+          storage.setItem("token_type", response.data.token_type);
 
           router.push("/dashboard");
         },
@@ -130,6 +133,8 @@ export default function Page() {
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
               <input
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.target.checked)}
                 className="size-4 rounded border-input accent-primary"
               />
               Recuerdame

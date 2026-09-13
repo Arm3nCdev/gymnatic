@@ -4,7 +4,7 @@ export const customInstance = async <T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> => {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
 
   const response = await fetch(`${API_URL}${url}`, {
     ...options,

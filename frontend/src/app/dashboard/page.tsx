@@ -7,7 +7,9 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token =
+      localStorage.getItem("access_token") ||
+      sessionStorage.getItem("access_token");
 
     if (!token) {
       router.replace("/login");
@@ -27,6 +29,22 @@ export default function Page() {
           </h1>
 
           <p className="mt-2 text-sm text-muted-foreground">Proximamente...</p>
+
+          <button
+            type="button"
+            className="h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={() => {
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("token_type");
+
+              sessionStorage.removeItem("access_token");
+              sessionStorage.removeItem("token_type");
+
+              router.replace("/login");
+            }}
+          >
+            Cerrar sesión
+          </button>
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
