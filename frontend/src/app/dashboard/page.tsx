@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { useLogoutAuthLogoutPost } from "@/api/endpoints/default/default";
 
+import Spinner from "@/components/Spinner";
+
 export default function Page() {
   const router = useRouter();
   const { isAuthenticated, isLoading, logout } = useAuth();
@@ -17,7 +19,7 @@ export default function Page() {
   }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
-    return <div>Cargando...</div>;
+    return <Spinner />;
   }
 
   return (

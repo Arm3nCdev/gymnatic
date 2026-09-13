@@ -8,10 +8,13 @@ import {
   useLoginAuthLoginPost,
 } from "@/api/endpoints/default/default";
 import { useAuth } from "@/providers/auth-provider";
+import { ApiError } from "@/api/mutator";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordMismatch, setPasswordMismatch] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
   const router = useRouter();
   const registerMutation = useCreateUserUsersPost();
   const loginMutation = useLoginAuthLoginPost();
@@ -19,6 +22,8 @@ export default function Page() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setRegisterError(null);
+    setPasswordMismatch(false);
 
     const formData = new FormData(event.currentTarget);
 
@@ -65,8 +70,23 @@ export default function Page() {
                 login(loginResponse.data.access_token);
                 router.push("/dashboard");
               },
+
+              onError: () => {
+                setRegisterError(
+                  "La cuenta fue creada, pero no se pudo iniciar sesión automáticamente.",
+                );
+              },
             },
           );
+        },
+
+        onError: (error) => {
+          if (error instanceof ApiError && error.status === 409) {
+            setRegisterError("Ese correo ya está registrado.");
+            return;
+          }
+
+          setRegisterError("No se pudo crear la cuenta. Intenta nuevamente.");
         },
       },
     );
@@ -170,7 +190,7 @@ export default function Page() {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type={showPassword ? "text" : "password"}
+                  type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="Repite tu contraseña"
                   required
@@ -178,11 +198,13 @@ export default function Page() {
                 />
                 <button
                   type="button"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
+                  onClick={() => setShowConfirmPassword((visible) => !visible)}
                   className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? (
+                  {showConfirmPassword ? (
                     <EyeOff className="size-4" />
                   ) : (
                     <Eye className="size-4" />
@@ -190,45 +212,47 @@ export default function Page() {
                 </button>
               </div>
 
-              {registerMutation.isError && (
-                <p className="text-sm text-destructive">
-                  No se pudo crear la cuenta. Verifica tus datos.
-                </p>
-              )}
-
               {passwordMismatch && (
-                <p className="text-sm text-destructive">
+                <p className="mb-2 text-sm text-destructive">
                   Las contraseñas no coinciden.
                 </p>
               )}
             </div>
-
-            <button
-              type="submit"
-              disabled={registerMutation.isPending || loginMutation.isPending}
-              className="h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25"
-            >
-              {registerMutation.isPending || loginMutation.isPending ? "Creando cuenta..." : "Registrarse"}
-            </button>
+            <div className="space-y-2">
+              <button
+                type="submit"
+                disabled={registerMutation.isPending || loginMutation.isPending}
+                className="h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25"
+              >
+                {registerMutation.isPending || loginMutation.isPending
+                  ? "Creando cuenta..."
+                  : "Registrarse"}
+              </button>
+              {registerError && (
+                <p className="text-center text-sm text-destructive">
+                  {registerError}
+                </p>
+              )}
+            </div>
           </form>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            Already have an account?{" "}
+            Ya tienes una cuenta?{" "}
             <button
               type="button"
               className="font-medium text-primary hover:underline"
               onClick={() => router.push("/login")}
             >
-              Sign in
+              Iniciar sesión
             </button>
           </p>
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Need access?{" "}
+            Necesitas acceso?{" "}
             <button
               type="button"
               className="font-medium text-primary hover:underline"
             >
-              Contact your admin
+              Contacta a tu administrador
             </button>
           </p>
         </div>

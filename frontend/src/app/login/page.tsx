@@ -5,11 +5,11 @@ import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useLoginAuthLoginPost } from "@/api/endpoints/default/default";
 import { useAuth } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
+import { ApiError } from "@/api/mutator";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-
+  const [loginError, setLoginError] = useState<string | null>(null);
   const router = useRouter();
   const loginMutation = useLoginAuthLoginPost();
   const { login } = useAuth();
@@ -35,9 +35,18 @@ export default function Page() {
             return;
           }
 
+          setLoginError(null);
           login(response.data.access_token);
-
           router.push("/dashboard");
+        },
+
+        onError: (error) => {
+          if (error instanceof ApiError && error.status === 401) {
+            setLoginError("Correo o contraseña incorrectos.");
+            return;
+          }
+
+          setLoginError("No se pudo iniciar sesión. Intenta nuevamente.");
         },
       },
     );
@@ -128,37 +137,23 @@ export default function Page() {
               </div>
             </div>
 
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(event) => setRememberMe(event.target.checked)}
-                className="size-4 rounded border-input accent-primary"
-              />
-              Recuerdame
-            </label>
+            <div className="space-y-2">
+              <button
+                type="submit"
+                disabled={loginMutation.isPending}
+                className="h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loginMutation.isPending
+                  ? "Iniciando sesión..."
+                  : "Iniciar sesión"}
+              </button>
 
-            <button
-              type="submit"
-              disabled={loginMutation.isPending}
-              className="h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loginMutation.isPending
-                ? "Iniciando sesión..."
-                : "Iniciar sesión"}
-            </button>
-
-            {loginMutation.isError && (
-              <p className="text-center text-sm text-red-500">
-                Correo o contraseña incorrectos.
-              </p>
-            )}
-
-            {loginMutation.isSuccess && (
-              <p className="text-center text-sm text-green-500">
-                ¡Inicio de sesión exitoso!
-              </p>
-            )}
+              {loginError && (
+                <p className="text-center text-sm text-destructive">
+                  {loginError}
+                </p>
+              )}
+            </div>
           </form>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">

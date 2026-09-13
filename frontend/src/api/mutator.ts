@@ -6,6 +6,18 @@ export function setAccessToken(token: string | null) {
   accessToken = token;
 }
 
+export class ApiError extends Error {
+  status: number;
+  data: unknown;
+
+  constructor(status: number, data: unknown) {
+    super("API request failed");
+    this.name = "ApiError";
+    this.status = status;
+    this.data = data;
+  }
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   try {
     const response = await fetch(`${API_URL}/auth/refresh`, {
@@ -66,7 +78,7 @@ export const customInstance = async <T>(
   const body = response.status === 204 ? null : await response.json();
 
   if (!response.ok) {
-    throw body;
+    throw new ApiError(response.status, body);
   }
 
   return {
@@ -75,3 +87,4 @@ export const customInstance = async <T>(
     headers: response.headers,
   } as T;
 };
+
